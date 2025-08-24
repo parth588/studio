@@ -5,6 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import {
   Tabs,
@@ -102,16 +107,40 @@ export function AuthForm() {
 
 
   const onSignInSubmit = (values: z.infer<typeof signInSchema>) => {
-    startTransition(() => {
-      // Handle sign in logic here
-      console.log("Sign In:", values);
+    startTransition(async () => {
+      try {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+            title: "Success",
+            description: "You have successfully signed in.",
+        });
+        // Handle successful sign-in (e.g., redirect)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Sign In Failed",
+          description: error.message,
+        });
+      }
     });
   };
 
   const onSignUpSubmit = (values: z.infer<typeof signUpSchema>) => {
-    startTransition(() => {
-      // Handle sign up logic here
-      console.log("Sign Up:", values);
+    startTransition(async () => {
+      try {
+        await createUserWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+            title: "Success",
+            description: "Your account has been created.",
+        });
+        // Handle successful sign-up (e.g., redirect)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Sign Up Failed",
+          description: error.message,
+        });
+      }
     });
   };
 
