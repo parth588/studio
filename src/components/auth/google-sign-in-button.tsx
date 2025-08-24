@@ -3,7 +3,6 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 const GoogleIcon = () => (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -15,22 +14,13 @@ const GoogleIcon = () => (
 );
 
 export function GoogleSignInButton(props: ButtonProps) {
-  const { toast } = useToast();
   const handleClick = async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({
-        title: "Success",
-        description: "You have successfully signed in with Google.",
-      });
       // Handle successful sign-in (e.g., redirect)
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Google Sign In Failed",
-        description: error.message,
-      });
+      console.error("Google sign in failed:", error.message);
     }
   };
 
