@@ -74,10 +74,15 @@ export function AuthForm() {
       setStrengthResult(result);
     } catch (error) {
       console.error("Failed to analyze password strength:", error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze password strength.",
+        variant: "destructive",
+      });
     } finally {
       setIsAnalyzing(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     const subscription = signUpForm.watch((value, { name }) => {
@@ -105,9 +110,18 @@ export function AuthForm() {
     startTransition(async () => {
       try {
         await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+          title: "Success",
+          description: "You have successfully signed in.",
+        });
         // Handle successful sign-in (e.g., redirect)
       } catch (error: any) {
         console.error("Sign in failed:", error.message);
+        toast({
+          title: "Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
       }
     });
   };
@@ -116,9 +130,18 @@ export function AuthForm() {
     startTransition(async () => {
       try {
         await createUserWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+          title: "Account Created",
+          description: "Your account has been successfully created.",
+        });
         // Handle successful sign-up (e.g., redirect)
       } catch (error: any) {
         console.error("Sign up failed:", error.message);
+        toast({
+          title: "Sign Up Failed",
+          description: error.message,
+          variant: "destructive",
+        });
       }
     });
   };
