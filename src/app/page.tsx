@@ -2,15 +2,37 @@ import { AuthForm } from '@/components/auth/auth-form';
 import { ShieldCheck, Zap, MessageSquareQuote } from 'lucide-react';
 
 const Logo = () => (
-    <div className="flex items-center gap-2">
-        <span className="font-bold text-2xl text-white">Big4India</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" fill="#FDBA74"/>
-            <path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4.5V19.5" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M19.071 4.92896C15.1658 1.0237 8.83418 1.0237 4.92893 4.92896" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21.2929 7.15178C17.3877 3.24653 11.056 3.24653 7.15076 7.15178" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    </div>
+  <div className="flex items-center">
+    <svg width="240" height="72" viewBox="0 0 240 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="10" y="50" fontFamily="Poppins, sans-serif" fontSize="40" fontWeight="bold" fill="#0D2E5E">
+        Big4
+      </text>
+      <g clipPath="url(#clip0_1_2)">
+        <text x="105" y="50" fontFamily="Poppins, sans-serif" fontSize="40" fontWeight="bold" fill="#0D2E5E">
+          India
+        </text>
+      </g>
+      <defs>
+        <clipPath id="clip0_1_2">
+          <rect x="105" y="0" width="135" height="40" />
+        </clipPath>
+      </defs>
+      <circle cx="185" cy="22" r="20" stroke="#F97316" strokeWidth="3" fill="none"/>
+      <circle cx="185" cy="22" r="2" fill="#F97316"/>
+      {[...Array(24)].map((_, i) => (
+        <line
+          key={i}
+          x1="185"
+          y1="22"
+          x2={185 + 18 * Math.cos((i * 15 * Math.PI) / 180)}
+          y2={22 + 18 * Math.sin((i * 15 * Math.PI) / 180)}
+          stroke="#F97316"
+          strokeWidth="1.5"
+        />
+      ))}
+      <rect x="110" y="60" width="90" height="5" rx="2.5" fill="#F97316" />
+    </svg>
+  </div>
 );
 
 
