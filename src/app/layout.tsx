@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'FinTrack Access',
-  description: 'Secure gateway to financial management',
+  title: 'Big4India',
+  description: 'Gateway to professional services and insights',
 };
 
 export default function RootLayout({

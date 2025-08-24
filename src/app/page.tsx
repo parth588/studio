@@ -1,6 +1,14 @@
 import { AuthForm } from '@/components/auth/auth-form';
 import Image from 'next/image';
-import { Lock } from 'lucide-react';
+
+const Logo = () => (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
+        <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M2 7L12 12L22 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 12V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+
 
 export default function Home() {
   return (
@@ -9,8 +17,8 @@ export default function Home() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <div className="flex justify-center items-center gap-2">
-                <Lock className="h-8 w-8 text-primary" />
-                <h1 className="text-3xl font-bold font-headline">FinTrack Access</h1>
+                <Logo />
+                <h1 className="text-3xl font-bold font-headline">Big4India</h1>
             </div>
             <p className="text-balance text-muted-foreground">
               Enter your credentials to access your account
@@ -26,7 +34,7 @@ export default function Home() {
           width="800"
           height="600"
           className="h-auto w-auto max-w-lg rounded-lg shadow-2xl"
-          data-ai-hint="finance security"
+          data-ai-hint="consulting business"
         />
       </div>
     </div>
