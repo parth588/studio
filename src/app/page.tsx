@@ -12,9 +12,9 @@ const Logo = () => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
+    <div className="min-h-screen w-full bg-background lg:grid lg:grid-cols-2">
+      <div className="flex items-center justify-center p-6 sm:p-12">
+        <div className="mx-auto grid w-full max-w-md gap-6">
           <div className="grid gap-2 text-center">
             <div className="flex justify-center items-center gap-2">
                 <Logo />
@@ -33,7 +33,7 @@ export default function Home() {
           alt="Image"
           width="800"
           height="600"
-          className="h-auto w-auto max-w-lg rounded-lg shadow-2xl"
+          className="h-auto w-auto max-w-full rounded-lg shadow-2xl object-cover"
           data-ai-hint="consulting business"
         />
       </div>
