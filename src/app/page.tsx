@@ -20,7 +20,6 @@ const Logo = () => (
                     />
                 ))}
             </g>
-            <rect x="110" y="60" width="90" height="5" rx="2.5" fill="#F97316" />
         </svg>
     </div>
 );
