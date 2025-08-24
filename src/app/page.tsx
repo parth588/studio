@@ -4,9 +4,7 @@ import { ShieldCheck, Zap, MessageSquareQuote } from 'lucide-react';
 const Logo = () => (
     <div className="flex items-center">
         <svg width="240" height="72" viewBox="0 0 240 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="10" y="50" fontFamily="Poppins, sans-serif" fontSize="40" fontWeight="bold" fill="white">
-                Big4India
-            </text>
+            <text x="10" y="50" fontFamily="Poppins, sans-serif" fontSize="40" fontWeight="bold" fill="white">Big4India</text>
             <g transform="translate(185, 22)">
                 <circle cx="0" cy="0" r="20" stroke="#FFFFFF" strokeWidth="3" fill="none" />
                 <circle cx="0" cy="0" r="2" fill="#FFFFFF" />
@@ -32,7 +30,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-5xl bg-white shadow-2xl rounded-2xl grid lg:grid-cols-2">
-        <div className="bg-blue-600 text-white p-12 rounded-l-2xl flex flex-col justify-between">
+        <div className="bg-blue-600 text-white p-12 rounded-l-2xl flex-col justify-between hidden lg:flex">
           <div>
             <Logo />
             <div className="mt-16">
@@ -57,7 +55,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="p-12">
+        <div className="p-6 sm:p-12 flex items-center justify-center">
           <AuthForm />
         </div>
       </div>
