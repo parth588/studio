@@ -3,24 +3,7 @@ import { ShieldCheck, Zap, MessageSquareQuote } from 'lucide-react';
 
 const Logo = () => (
     <div className="flex items-center">
-        <svg width="240" height="72" viewBox="0 0 240 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="10" y="50" fontFamily="Poppins, sans-serif" fontSize="40" fontWeight="bold" fill="white">Big4India</text>
-            <g transform="translate(185, 22)">
-                <circle cx="0" cy="0" r="20" stroke="#FFFFFF" strokeWidth="3" fill="none" />
-                <circle cx="0" cy="0" r="2" fill="#FFFFFF" />
-                {[...Array(24)].map((_, i) => (
-                    <line
-                        key={i}
-                        x1="0"
-                        y1="0"
-                        x2={18 * Math.cos((i * 15 * Math.PI) / 180)}
-                        y2={18 * Math.sin((i * 15 * Math.PI) / 180)}
-                        stroke="#FFFFFF"
-                        strokeWidth="1.5"
-                    />
-                ))}
-            </g>
-        </svg>
+        <h1 className="text-4xl font-bold text-white">Big4India</h1>
     </div>
 );
 
