@@ -4,19 +4,13 @@ import { useState, useTransition, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -50,12 +44,12 @@ const signUpSchema = z.object({
 
 export function AuthForm() {
   const [isPending, startTransition] = useTransition();
-  const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [strengthResult, setStrengthResult] =
     useState<AnalyzePasswordStrengthOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
+  const [formType, setFormType] = useState<"signIn" | "signUp">("signIn");
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -94,7 +88,7 @@ export function AuthForm() {
   }, [signUpForm.watch]);
   
   useEffect(() => {
-    if (!password) {
+    if (!password || formType === 'signIn') {
       setStrengthResult(null);
       return;
     }
@@ -103,7 +97,7 @@ export function AuthForm() {
     }, 500);
 
     return () => clearTimeout(debouncedAnalyze);
-  }, [password, analyze]);
+  }, [password, analyze, formType]);
 
 
   const onSignInSubmit = (values: z.infer<typeof signInSchema>) => {
@@ -114,7 +108,6 @@ export function AuthForm() {
           title: "Success",
           description: "You have successfully signed in.",
         });
-        // Handle successful sign-in (e.g., redirect)
       } catch (error: any) {
         console.error("Sign in failed:", error.message);
         toast({
@@ -134,7 +127,7 @@ export function AuthForm() {
           title: "Account Created",
           description: "Your account has been successfully created.",
         });
-        // Handle successful sign-up (e.g., redirect)
+        setFormType("signIn");
       } catch (error: any) {
         console.error("Sign up failed:", error.message);
         toast({
@@ -146,166 +139,157 @@ export function AuthForm() {
     });
   };
 
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
-
   return (
-    <Tabs defaultValue="sign-in" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="sign-in">Sign In</TabsTrigger>
-        <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
-      </TabsList>
-      <TabsContent value="sign-in">
-        <Form {...signInForm}>
-          <form
-            onSubmit={signInForm.handleSubmit(onSignInSubmit)}
-            className="space-y-4 mt-4"
-          >
-            <FormField
-              control={signInForm.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <FormControl>
-                      <Input
-                        className="pl-10"
-                        type="email"
-                        placeholder="your@email.com"
-                        {...field}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={signInForm.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                    <div className="flex items-center">
+    <div className="mx-auto grid w-full max-w-sm gap-6">
+        {formType === 'signIn' ? (
+          <>
+            <div className="grid gap-2">
+                <h1 className="text-3xl font-bold">Welcome Back</h1>
+                <p className="text-balance text-muted-foreground">
+                    Please sign in to access your dashboard.
+                </p>
+            </div>
+            <Form {...signInForm}>
+              <form
+                onSubmit={signInForm.handleSubmit(onSignInSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={signInForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="your@email.com"
+                            {...field}
+                            disabled={isPending}
+                          />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signInForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                        <div className="flex items-center">
+                            <FormLabel>Password</FormLabel>
+                            <a href="#" className="ml-auto inline-block text-sm text-blue-600 hover:underline">
+                                Forgot your password?
+                            </a>
+                        </div>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
+                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sign In
+                </Button>
+              </form>
+            </Form>
+          </>
+        ) : (
+            <>
+                <div className="grid gap-2">
+                    <h1 className="text-3xl font-bold">Create an Account</h1>
+                    <p className="text-balance text-muted-foreground">
+                        Enter your details to get started.
+                    </p>
+                </div>
+                <Form {...signUpForm}>
+                <form
+                    onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+                    className="space-y-4"
+                >
+                    <FormField
+                    control={signUpForm.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                            <Input
+                                type="email"
+                                placeholder="your@email.com"
+                                {...field}
+                                disabled={isPending}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={signUpForm.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <a href="#" className="ml-auto inline-block text-sm underline">
-                            Forgot your password?
-                        </a>
-                    </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <FormControl>
-                      <Input
-                        className="pl-10 pr-10"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        {...field}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                      onClick={togglePasswordVisibility}
-                      disabled={isPending}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                        <FormControl>
+                            <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                            disabled={isPending}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <PasswordStrengthIndicator result={strengthResult} isLoading={isAnalyzing} />
+                    <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
+                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Account
                     </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-          </form>
-        </Form>
-        <Separator className="my-6" />
+                </form>
+                </Form>
+            </>
+        )}
+        
+        <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">
+                OR
+                </span>
+            </div>
+        </div>
+
         <GoogleSignInButton disabled={isPending} />
-      </TabsContent>
-      <TabsContent value="sign-up">
-        <Form {...signUpForm}>
-          <form
-            onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
-            className="space-y-4 mt-4"
-          >
-            <FormField
-              control={signUpForm.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <FormControl>
-                      <Input
-                        className="pl-10"
-                        type="email"
-                        placeholder="your@email.com"
-                        {...field}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={signUpForm.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <FormControl>
-                      <Input
-                        className="pl-10 pr-10"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        {...field}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                      onClick={togglePasswordVisibility}
-                      disabled={isPending}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <PasswordStrengthIndicator result={strengthResult} isLoading={isAnalyzing} />
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
-            </Button>
-          </form>
-        </Form>
-        <Separator className="my-6" />
-        <GoogleSignInButton disabled={isPending} />
-      </TabsContent>
-    </Tabs>
+        
+        <div className="text-center text-sm text-muted-foreground">
+            By continuing, you agree to the{" "}
+            <a href="#" className="underline text-gray-900 hover:text-blue-600">Terms of Service</a> &{" "}
+            <a href="#" className="underline text-gray-900 hover:text-blue-600">Privacy Policy</a>.
+        </div>
+        
+        <div className="text-center text-sm">
+            {formType === 'signIn' ? "Don't have an account? " : "Already have an account? "}
+            <button 
+                onClick={() => setFormType(formType === 'signIn' ? 'signUp' : 'signIn')} 
+                className="font-semibold text-blue-600 hover:underline"
+                disabled={isPending}
+            >
+            {formType === 'signIn' ? 'Sign Up' : 'Sign In'}
+            </button>
+        </div>
+    </div>
   );
 }

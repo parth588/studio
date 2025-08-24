@@ -24,7 +24,6 @@ export function GoogleSignInButton(props: ButtonProps) {
         title: "Success",
         description: "You have successfully signed in with Google.",
       });
-      // Handle successful sign-in (e.g., redirect)
     } catch (error: any) {
       console.error("Google sign in failed:", error.message);
       toast({
@@ -36,7 +35,7 @@ export function GoogleSignInButton(props: ButtonProps) {
   };
 
   return (
-    <Button variant="outline" className="w-full" onClick={handleClick} {...props}>
+    <Button variant="outline" className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600" onClick={handleClick} {...props}>
       <GoogleIcon />
       <span className="ml-2">Sign in with Google</span>
     </Button>
