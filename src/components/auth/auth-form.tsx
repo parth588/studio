@@ -84,12 +84,11 @@ export function AuthForm() {
     }
   }, [toast]);
   
+  const passwordValue = signUpForm.watch("password");
   useEffect(() => {
-    const subscription = signUpForm.watch((value) => {
-        setPassword(value.password || "");
-    });
-    return () => subscription.unsubscribe();
-  }, [signUpForm, signUpForm.watch]);
+    setPassword(passwordValue);
+  }, [passwordValue]);
+
 
   useEffect(() => {
     if (!password || formType === 'signIn') {
