@@ -35,12 +35,18 @@ const signInSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-const signUpSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email." }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters." }),
-});
+const signUpSchema = z
+  .object({
+    email: z.string().email({ message: "Please enter a valid email." }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters." }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export function AuthForm() {
   const [isPending, startTransition] = useTransition();
@@ -58,7 +64,7 @@ export function AuthForm() {
 
   const signUpForm = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", confirmPassword: "" },
   });
 
   const analyze = useCallback(async (passwordToAnalyze: string) => {
@@ -250,6 +256,24 @@ export function AuthForm() {
                         <FormMessage />
                         </FormItem>
                     )}
+                    />
+                    <FormField
+                      control={signUpForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="••••••••"
+                              {...field}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                     <PasswordStrengthIndicator result={strengthResult} isLoading={isAnalyzing} />
                     <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
