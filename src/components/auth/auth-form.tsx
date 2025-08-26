@@ -83,16 +83,14 @@ export function AuthForm() {
       setIsAnalyzing(false);
     }
   }, [toast]);
-
+  
   useEffect(() => {
-    const subscription = signUpForm.watch((value, { name }) => {
-      if (name === "password") {
+    const subscription = signUpForm.watch((value) => {
         setPassword(value.password || "");
-      }
     });
     return () => subscription.unsubscribe();
-  }, [signUpForm.watch]);
-  
+  }, [signUpForm, signUpForm.watch]);
+
   useEffect(() => {
     if (!password || formType === 'signIn') {
       setStrengthResult(null);
