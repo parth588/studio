@@ -40,7 +40,11 @@ const signUpSchema = z
     email: z.string().email({ message: "Please enter a valid email." }),
     password: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters." }),
+      .min(8, { message: "Password must be at least 8 characters." })
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
+      .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter." })
+      .regex(/[0-9]/, { message: "Password must contain at least one number." })
+      .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -91,16 +95,16 @@ export function AuthForm() {
 
 
   useEffect(() => {
-    if (!password || formType === 'signIn') {
+    if (!passwordValue || formType === 'signIn') {
       setStrengthResult(null);
       return;
     }
     const debouncedAnalyze = setTimeout(() => {
-        analyze(password);
+        analyze(passwordValue);
     }, 500);
 
     return () => clearTimeout(debouncedAnalyze);
-  }, [password, analyze, formType]);
+  }, [passwordValue, analyze, formType]);
 
 
   const onSignInSubmit = (values: z.infer<typeof signInSchema>) => {
@@ -131,7 +135,8 @@ export function AuthForm() {
           description: "Your account has been successfully created.",
         });
         setFormType("signIn");
-      } catch (error: any) {
+      } catch (error: any)
+      {
         console.error("Sign up failed:", error.message);
         toast({
           title: "Sign Up Failed",
