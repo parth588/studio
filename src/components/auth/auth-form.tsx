@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { GoogleSignInButton } from "./google-sign-in-button";
 import { PasswordStrengthIndicator } from "./password-strength-indicator";
 import {
@@ -52,20 +51,105 @@ const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-export function AuthForm() {
+function SignInForm({ setFormType }: { setFormType: (type: "signIn" | "signUp") => void }) {
   const [isPending, startTransition] = useTransition();
-  const [strengthResult, setStrengthResult] =
-    useState<AnalyzePasswordStrengthOutput | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
-  const [formType, setFormType] = useState<"signIn" | "signUp">("signIn");
-
-  const signInForm = useForm<z.infer<typeof signInSchema>>({
+  const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  const signUpForm = useForm<z.infer<typeof signUpSchema>>({
+  const onSubmit = (values: z.infer<typeof signInSchema>) => {
+    startTransition(async () => {
+      try {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+          title: "Success",
+          description: "You have successfully signed in.",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
+  return (
+    <>
+      <div className="grid gap-2">
+        <h1 className="text-3xl font-bold">Welcome Back</h1>
+        <p className="text-balance text-muted-foreground">
+          Please sign in to access your dashboard.
+        </p>
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Address</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center">
+                  <FormLabel>Password</FormLabel>
+                  <a href="#" className="ml-auto inline-block text-sm text-blue-600 hover:underline">
+                    Forgot your password?
+                  </a>
+                </div>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign In
+          </Button>
+        </form>
+      </Form>
+      <AuthFormFooter
+        formType="signIn"
+        setFormType={setFormType}
+        isPending={isPending}
+      />
+    </>
+  );
+}
+
+function SignUpForm({ setFormType }: { setFormType: (type: "signIn" | "signUp") => void }) {
+  const [isPending, startTransition] = useTransition();
+  const [strengthResult, setStrengthResult] = useState<AnalyzePasswordStrengthOutput | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: { email: "", password: "", confirmPassword: "" },
   });
@@ -86,42 +170,22 @@ export function AuthForm() {
       setIsAnalyzing(false);
     }
   }, [toast]);
-  
-  const passwordValue = signUpForm.watch("password");
+
+  const passwordValue = form.watch("password");
 
   useEffect(() => {
-    if (!passwordValue || formType === 'signIn') {
+    if (!passwordValue) {
       setStrengthResult(null);
       return;
     }
     const debouncedAnalyze = setTimeout(() => {
-        analyze(passwordValue);
+      analyze(passwordValue);
     }, 500);
 
     return () => clearTimeout(debouncedAnalyze);
-  }, [passwordValue, analyze, formType]);
+  }, [passwordValue, analyze]);
 
-
-  const onSignInSubmit = (values: z.infer<typeof signInSchema>) => {
-    startTransition(async () => {
-      try {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
-        toast({
-          title: "Success",
-          description: "You have successfully signed in.",
-        });
-      } catch (error: any) {
-        console.error("Sign in failed:", error.message);
-        toast({
-          title: "Sign In Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    });
-  };
-
-  const onSignUpSubmit = (values: z.infer<typeof signUpSchema>) => {
+  const onSubmit = (values: z.infer<typeof signUpSchema>) => {
     startTransition(async () => {
       try {
         await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -130,9 +194,7 @@ export function AuthForm() {
           description: "Your account has been successfully created.",
         });
         setFormType("signIn");
-      } catch (error: any)
-      {
-        console.error("Sign up failed:", error.message);
+      } catch (error: any) {
         toast({
           title: "Sign Up Failed",
           description: error.message,
@@ -143,174 +205,133 @@ export function AuthForm() {
   };
 
   return (
-    <div className="mx-auto grid w-full max-w-sm gap-6">
-        {formType === 'signIn' ? (
-          <>
-            <div className="grid gap-2">
-                <h1 className="text-3xl font-bold">Welcome Back</h1>
-                <p className="text-balance text-muted-foreground">
-                    Please sign in to access your dashboard.
-                </p>
-            </div>
-            <Form {...signInForm}>
-              <form
-                onSubmit={signInForm.handleSubmit(onSignInSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={signInForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="your@email.com"
-                            {...field}
-                            disabled={isPending}
-                          />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={signInForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                        <div className="flex items-center">
-                            <FormLabel>Password</FormLabel>
-                            <a href="#" className="ml-auto inline-block text-sm text-blue-600 hover:underline">
-                                Forgot your password?
-                            </a>
-                        </div>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                            disabled={isPending}
-                          />
-                        </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
-                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
-                </Button>
-              </form>
-            </Form>
-          </>
-        ) : (
-            <>
-                <div className="grid gap-2">
-                    <h1 className="text-3xl font-bold">Create an Account</h1>
-                    <p className="text-balance text-muted-foreground">
-                        Enter your details to get started.
-                    </p>
-                </div>
-                <Form {...signUpForm}>
-                <form
-                    onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
-                    className="space-y-4"
-                >
-                    <FormField
-                    control={signUpForm.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                            <Input
-                                type="email"
-                                placeholder="your@email.com"
-                                {...field}
-                                disabled={isPending}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={signUpForm.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                            <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                            disabled={isPending}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                      control={signUpForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="••••••••"
-                              {...field}
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <PasswordStrengthIndicator result={strengthResult} isLoading={isAnalyzing} />
-                    <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
-                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Account
-                    </Button>
-                </form>
-                </Form>
-            </>
-        )}
-        
-        <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">
-                OR
-                </span>
-            </div>
-        </div>
+    <>
+      <div className="grid gap-2">
+        <h1 className="text-3xl font-bold">Create an Account</h1>
+        <p className="text-balance text-muted-foreground">
+          Enter your details to get started.
+        </p>
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Address</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <PasswordStrengthIndicator result={strengthResult} isLoading={isAnalyzing} />
+          <Button type="submit" className="w-full bg-blue-700 hover:bg-blue-800" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create Account
+          </Button>
+        </form>
+      </Form>
+      <AuthFormFooter
+        formType="signUp"
+        setFormType={setFormType}
+        isPending={isPending}
+      />
+    </>
+  );
+}
 
-        <GoogleSignInButton disabled={isPending} />
-        
-        <div className="text-center text-sm text-muted-foreground">
-            By continuing, you agree to the{" "}
-            <a href="#" className="underline text-gray-900 hover:text-blue-600">Terms of Service</a> &{" "}
-            <a href="#" className="underline text-gray-900 hover:text-blue-600">Privacy Policy</a>.
+function AuthFormFooter({ formType, setFormType, isPending }: {
+  formType: "signIn" | "signUp";
+  setFormType: (type: "signIn" | "signUp") => void;
+  isPending: boolean;
+}) {
+  return (
+    <>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
         </div>
-        
-        <div className="text-center text-sm">
-            {formType === 'signIn' ? "Don't have an account? " : "Already have an account? "}
-            <button 
-                onClick={() => setFormType(formType === 'signIn' ? 'signUp' : 'signIn')} 
-                className="font-semibold text-blue-600 hover:underline"
-                disabled={isPending}
-            >
-            {formType === 'signIn' ? 'Sign Up' : 'Sign In'}
-            </button>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-muted-foreground">OR</span>
         </div>
+      </div>
+
+      <GoogleSignInButton disabled={isPending} />
+
+      <div className="text-center text-sm text-muted-foreground">
+        By continuing, you agree to the{" "}
+        <a href="#" className="underline text-gray-900 hover:text-blue-600">Terms of Service</a> &{" "}
+        <a href="#" className="underline text-gray-900 hover:text-blue-600">Privacy Policy</a>.
+      </div>
+
+      <div className="text-center text-sm">
+        {formType === 'signIn' ? "Don't have an account? " : "Already have an account? "}
+        <button
+          onClick={() => setFormType(formType === 'signIn' ? 'signUp' : 'signIn')}
+          className="font-semibold text-blue-600 hover:underline"
+          disabled={isPending}
+        >
+          {formType === 'signIn' ? 'Sign Up' : 'Sign In'}
+        </button>
+      </div>
+    </>
+  );
+}
+
+export function AuthForm() {
+  const [formType, setFormType] = useState<"signIn" | "signUp">("signIn");
+
+  return (
+    <div className="mx-auto grid w-full max-w-sm gap-6">
+      {formType === 'signIn' ? (
+        <SignInForm setFormType={setFormType} />
+      ) : (
+        <SignUpForm setFormType={setFormType} />
+      )}
     </div>
   );
 }
