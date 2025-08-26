@@ -54,7 +54,6 @@ const signUpSchema = z
 
 export function AuthForm() {
   const [isPending, startTransition] = useTransition();
-  const [password, setPassword] = useState("");
   const [strengthResult, setStrengthResult] =
     useState<AnalyzePasswordStrengthOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -89,10 +88,6 @@ export function AuthForm() {
   }, [toast]);
   
   const passwordValue = signUpForm.watch("password");
-  useEffect(() => {
-    setPassword(passwordValue);
-  }, [passwordValue]);
-
 
   useEffect(() => {
     if (!passwordValue || formType === 'signIn') {
